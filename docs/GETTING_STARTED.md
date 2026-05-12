@@ -59,10 +59,12 @@ Usage: aitool [OPTIONS] COMMAND [ARGS]...
 Commands:
   search     Search the registry for AI tools.
   install    Install an AI tool from the registry.
+  update     Update an installed plugin to its latest version.
+  uninstall  Uninstall a plugin and remove its directory.
   list       List tools from the registry with their installation status.
   run        Execute an installed plugin's run() function.
   info       Display detailed information about a registry tool.
-  uninstall  Uninstall a plugin and remove its directory.
+  refresh    Fetch current GitHub star counts and update the registry.
   doctor     Check the health of installed plugins.
 ```
 
@@ -76,7 +78,7 @@ The registry contains the catalog of available AI tools. Start by listing everyt
 aitool list
 ```
 
-You'll see a table with all 5 built-in tools, their categories, star counts, and descriptions.
+You'll see a table with all 12 built-in tools, their categories, star counts, and descriptions.
 
 ### Search for something specific
 

@@ -10,37 +10,37 @@
 
 | Tâche | Priorité | Statut |
 |-------|----------|--------|
-| Init repo GitHub | P0 | 🔲 |
-| Structure du projet Python | P0 | 🔲 |
-| Setup pyproject.toml + dépendances | P0 | 🔲 |
-| CLI Typer de base (hello world) | P0 | 🔲 |
-| CI/CD GitHub Actions (lint + test) | P1 | 🔲 |
-| README.md initial | P0 | 🔲 |
-| Licence MIT | P0 | 🔲 |
-| .gitignore + .editorconfig | P1 | 🔲 |
+| Init repo GitHub | P0 | ✅ |
+| Structure du projet Python | P0 | ✅ |
+| Setup pyproject.toml + dépendances | P0 | ✅ |
+| CLI Typer de base (hello world) | P0 | ✅ |
+| CI/CD GitHub Actions (lint + test) | P1 | ✅ |
+| README.md initial | P0 | ✅ |
+| Licence MIT | P0 | ✅ |
+| .gitignore + .editorconfig | P1 | ✅ |
 
 ---
 
-### 🚀 Phase 1 — MVP (Semaines 3-6)
+### ✅ Phase 1 — MVP (Semaines 3-6)
 
 | Tâche | Priorité | Statut |
 |-------|----------|--------|
-| Commande `search` | P0 | 🔲 |
-| Commande `install` | P0 | 🔲 |
-| Commande `list` | P0 | 🔲 |
-| Commande `run` | P0 | 🔲 |
-| Commande `info` | P1 | 🔲 |
-| Commande `uninstall` | P1 | 🔲 |
-| Registry statique JSON (≥5 outils) | P0 | 🔲 |
-| Plugin Spec V1 (plugin.yaml) | P0 | 🔲 |
-| Système d'installation (clone + venv) | P0 | 🔲 |
-| Système d'exécution (run dynamique) | P0 | 🔲 |
-| Plugin: Ruflo | P0 | 🔲 |
-| Plugin: Caveman | P0 | 🔲 |
-| Plugin: Ollama | P1 | 🔲 |
-| Tests unitaires (≥70% coverage) | P1 | 🔲 |
-| Documentation utilisateur | P1 | 🔲 |
-| Premier release v0.1.0 | P0 | 🔲 |
+| Commande `search` | P0 | ✅ |
+| Commande `install` | P0 | ✅ |
+| Commande `list` | P0 | ✅ |
+| Commande `run` | P0 | ✅ |
+| Commande `info` | P1 | ✅ |
+| Commande `uninstall` | P1 | ✅ |
+| Registry statique JSON (≥5 outils) | P0 | ✅ |
+| Plugin Spec V1 (plugin.yaml) | P0 | ✅ |
+| Système d'installation (clone + venv) | P0 | ✅ |
+| Système d'exécution (run dynamique) | P0 | ✅ |
+| Plugin: Ruflo | P0 | ✅ |
+| Plugin: Caveman | P0 | ✅ |
+| Plugin: Ollama | P1 | ✅ |
+| Tests unitaires (≥70% coverage) | P1 | ✅ 79 tests, 74% |
+| Documentation utilisateur | P1 | ✅ |
+| Premier release v0.1.0 | P0 | ✅ |
 
 ---
 
@@ -48,15 +48,15 @@
 
 | Tâche | Priorité | Statut |
 |-------|----------|--------|
-| Commande `doctor` | P1 | 🔲 |
-| Commande `update` | P1 | 🔲 |
-| GitHub API scraper (trending repos) | P1 | 🔲 |
+| Commande `doctor` | P1 | ✅ |
+| Commande `update` | P1 | ✅ |
+| GitHub API star refresh (`aitool refresh`) | P1 | ✅ |
+| 12+ plugins dans le registry | P1 | ✅ crewai, autogen, whisper, tabby, litellm, llama-index, open-interpreter |
 | Auto-tagging des outils | P2 | 🔲 |
 | Ranking par pertinence / étoiles | P2 | 🔲 |
 | Cache SQLite des résultats | P2 | 🔲 |
 | Plugin hooks (pre/post install/run) | P1 | 🔲 |
 | Config multi-profils | P2 | 🔲 |
-| 10+ plugins dans le registry | P1 | 🔲 |
 | Release v0.5.0 | P0 | 🔲 |
 
 ---

@@ -9,7 +9,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://docs.astral.sh/ruff/)
-[![Tests](https://img.shields.io/badge/tests-65%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-79%20passed-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/coverage-74%25-yellowgreen)]()
 
 [English](#english) · [Français](README.fr.md)
@@ -88,10 +88,12 @@ aitoolintegrator/
 │   └── commands/
 │       ├── search.py           # aitool search
 │       ├── install.py          # aitool install
-│       ├── run.py              # aitool run
-│       ├── list_tools.py       # aitool list
-│       ├── info.py             # aitool info
+│       ├── update.py           # aitool update
 │       ├── uninstall.py        # aitool uninstall
+│       ├── list_tools.py       # aitool list
+│       ├── run.py              # aitool run
+│       ├── info.py             # aitool info
+│       ├── refresh.py          # aitool refresh
 │       └── doctor.py           # aitool doctor
 ├── core/
 │   ├── engine.py               # Central orchestrator — all operations go through here
@@ -106,7 +108,7 @@ aitoolintegrator/
 │       ├── .venv/              # Isolated virtual environment
 │       └── src/                # Cloned source code
 ├── registry/
-│   ├── tools.json              # Static tool catalog (5 tools included)
+│   ├── tools.json              # Static tool catalog (12 tools included)
 │   └── schema.json             # JSON Schema for validation
 └── utils/
     ├── git.py                  # GitPython helpers
@@ -175,8 +177,8 @@ pip install aitoolintegrator
 
 ```bash
 # Clone the repository
-git clone https://github.com/aitoolintegrator/aitoolintegrator
-cd aitoolintegrator
+git clone https://github.com/domlemay/AiToolIntegrator
+cd AiToolIntegrator
 
 # Install in editable mode with dev dependencies
 pip install -e ".[dev]"
@@ -202,7 +204,7 @@ pip install -e ".[dev]"
 ## Quick Start
 
 ```bash
-# 1. Browse the tool catalog
+# 1. Browse the tool catalog (12 tools)
 aitool list
 
 # 2. Search for a specific tool or category
@@ -218,7 +220,13 @@ aitool install aider
 # 5. Run the tool
 aitool run aider
 
-# 6. Check all your plugins are healthy
+# 6. Update a plugin to its latest version
+aitool update aider
+
+# 7. Refresh star counts from GitHub
+aitool refresh
+
+# 8. Check all your plugins are healthy
 aitool doctor
 ```
 
@@ -317,6 +325,44 @@ Extra arguments after the tool name are forwarded directly to the plugin's `run(
 ```
 plugin.yaml defaults  →  config.yaml  →  CLI args
 ```
+
+---
+
+### `aitool update <tool>`
+
+Pull the latest source and reinstall dependencies for an installed plugin.
+
+```bash
+aitool update aider          # update a single tool
+aitool update --all          # update every installed plugin
+```
+
+| Option | Description |
+|--------|-------------|
+| `--all` | Update every installed plugin in one pass |
+
+**What happens:**
+1. `git fetch --depth=1` + `git reset --hard FETCH_HEAD` in `src/`
+2. Reinstalls `requirements.txt` if present
+3. Re-runs `install.py` hook if present
+
+---
+
+### `aitool refresh`
+
+Fetch current GitHub star counts and update the local registry file.
+
+```bash
+aitool refresh                           # anonymous (60 req/hr limit)
+aitool refresh --token ghp_xxxxx         # with token (5 000 req/hr)
+GITHUB_TOKEN=ghp_xxxxx aitool refresh    # via environment variable
+```
+
+| Option | Short | Description |
+|--------|-------|-------------|
+| `--token TOKEN` | `-t` | GitHub personal access token (or set `GITHUB_TOKEN`) |
+
+All repository calls are made **concurrently** (`asyncio.gather`). The registry file is updated in-place and a Rich table shows the before/after delta for each tool.
 
 ---
 
@@ -491,15 +537,22 @@ aitool run my-tool       # execute it
 
 ## Built-in Registry
 
-AiToolIntegrator ships with 5 curated tools:
+AiToolIntegrator ships with **12 curated tools** across 6 categories. Run `aitool refresh` to sync star counts from GitHub.
 
 | Tool | Category | Stars | Description |
 |------|----------|-------|-------------|
+| [whisper](https://github.com/openai/whisper) | speech-to-text | ~75k | OpenAI speech recognition — transcribe and translate 99 languages locally |
+| [ollama](https://github.com/ollama/ollama) | llm-runtime | ~130k | Run LLMs locally with a single command |
+| [open-interpreter](https://github.com/OpenInterpreter/open-interpreter) | agent-framework | ~55k | Natural language interface to run code on your computer |
+| [aider](https://github.com/Aider-AI/aider) | coding-assistant | ~44k | AI pair programming in your terminal, Git-native |
+| [llama-index](https://github.com/run-llama/llama_index) | rag-framework | ~37k | Data framework for LLM apps over your own data |
+| [autogen](https://github.com/microsoft/autogen) | agent-framework | ~35k | Multi-agent conversation framework by Microsoft Research |
+| [fabric](https://github.com/danielmiessler/fabric) | prompt-engineering | ~30k | Modular prompt patterns framework for augmenting human capabilities |
+| [crewai](https://github.com/crewAIInc/crewAI) | agent-framework | ~25k | Framework for orchestrating role-playing autonomous AI agents |
+| [tabby](https://github.com/TabbyML/tabby) | coding-assistant | ~22k | Self-hosted AI coding assistant with IDE integrations |
+| [litellm](https://github.com/BerriAI/litellm) | llm-runtime | ~15k | Unified API gateway for 100+ LLM providers |
 | [ruflo](https://github.com/ruvnet/ruflo) | agent-orchestrator | ~2k | Multi-agent orchestration platform for AI coding assistants |
 | [caveman](https://github.com/explainx/skills) | prompt-engineering | ~500 | Reduce output tokens ~70% with telegraphic style |
-| [ollama](https://github.com/ollama/ollama) | llm-runtime | ~130k | Run LLMs locally with a single command |
-| [aider](https://github.com/Aider-AI/aider) | coding-assistant | ~44k | AI pair programming in your terminal, Git-native |
-| [fabric](https://github.com/danielmiessler/fabric) | prompt-engineering | ~30k | Modular prompt patterns framework for augmenting human capabilities |
 
 ### Adding a tool to the registry
 
@@ -533,8 +586,8 @@ Then open a pull request — the entry will be validated automatically against `
 ### Setup
 
 ```bash
-git clone https://github.com/aitoolintegrator/aitoolintegrator
-cd aitoolintegrator
+git clone https://github.com/domlemay/AiToolIntegrator
+cd AiToolIntegrator
 python -m venv .venv
 source .venv/bin/activate   # or .venv\Scripts\activate on Windows
 pip install -e ".[dev]"
@@ -615,18 +668,18 @@ Contributions are welcome! Here is how to get started:
 |------|-------------|------------|
 | Bug fix | Fix an existing issue | Easy |
 | Documentation | Improve README, docstrings, examples | Easy |
-| New plugin | Add a new tool to `registry/tools.json` | Easy |
-| New command | Add a CLI command (e.g. `aitool update`) | Medium |
-| New feature | Installer improvements, GitHub scraper, etc. | Medium |
-| Architecture | Docker isolation, pipeline engine | Advanced |
+| New registry entry | Add a tool to `registry/tools.json` | Easy |
+| New command | Add a CLI command (e.g. `aitool workflow`) | Medium |
+| New feature | Installer improvements, pipeline engine | Medium |
+| Architecture | Docker isolation, central registry API | Advanced |
 
 ---
 
 ## Roadmap
 
-- **v0.1** (current) — Core CLI, 5 tools in registry, Plugin Spec V1
-- **v0.5** — GitHub trending scraper, `aitool update`, 15+ tools
-- **v0.8** — YAML pipeline engine (`aitool workflow run file.yaml`)
+- **v0.1** ✅ (current) — Core CLI (9 commands), 12 tools in registry, Plugin Spec V1, GitHub star auto-refresh
+- **v0.5** — YAML pipeline engine (`aitool workflow run file.yaml`), 20+ tools
+- **v0.8** — Plugin scaffolding (`aitool create-plugin`), Docker isolation
 - **v1.0** — Central registry API, community marketplace
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the full roadmap.
