@@ -3,19 +3,17 @@
 from __future__ import annotations
 
 import importlib.util
-import sys
 from pathlib import Path
 from typing import Any
 
 import yaml
 from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
 
-from aitoolintegrator.core.config import PluginManifest, RegistryEntry
+from aitoolintegrator.core.config import RegistryEntry
 from aitoolintegrator.core.registry import get_entry
 from aitoolintegrator.utils.git import clone_repo
 from aitoolintegrator.utils.logger import get_logger, print_error, print_success
-from aitoolintegrator.utils.venv import create_venv, install_requirements, venv_exists
-
+from aitoolintegrator.utils.venv import create_venv, install_requirements
 
 logger = get_logger(__name__)
 

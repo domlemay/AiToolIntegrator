@@ -12,7 +12,6 @@ from aitoolintegrator.core.config import AppConfig
 from aitoolintegrator.core.engine import Engine
 from aitoolintegrator.utils.logger import get_output_console, print_error
 
-
 console = get_output_console()
 
 

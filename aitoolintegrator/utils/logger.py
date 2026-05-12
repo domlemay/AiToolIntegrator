@@ -3,13 +3,10 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.panel import Panel
-from rich.text import Text
-
 
 console = Console(stderr=True)
 _output_console = Console()
@@ -61,7 +58,7 @@ def print_warning(message: str) -> None:
 
 def print_info(message: str) -> None:
     """Print an info message."""
-    _output_console.print(f"[cyan]ℹ  {message}[/cyan]")
+    _output_console.print(f"[cyan]i  {message}[/cyan]")
 
 
 def print_panel(title: str, content: str, style: str = "blue") -> None:

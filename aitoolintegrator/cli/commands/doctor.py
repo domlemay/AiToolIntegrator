@@ -11,7 +11,6 @@ from aitoolintegrator.core.config import AppConfig
 from aitoolintegrator.core.engine import Engine
 from aitoolintegrator.utils.logger import get_output_console, print_info, print_success
 
-
 console = get_output_console()
 
 
@@ -34,11 +33,11 @@ def doctor_cmd(
     """
     engine = Engine(AppConfig())
 
-    installed = [
-        d.name
-        for d in engine.plugins_dir.iterdir()
-        if d.is_dir() and not d.name.startswith(".")
-    ] if engine.plugins_dir.exists() else []
+    installed = (
+        [d.name for d in engine.plugins_dir.iterdir() if d.is_dir() and not d.name.startswith(".")]
+        if engine.plugins_dir.exists()
+        else []
+    )
 
     if not installed and not tool_name:
         print_info("No plugins installed. Run 'aitool install <tool>' to get started.")
@@ -79,6 +78,7 @@ def doctor_cmd(
         print_success("All plugins are healthy!")
     else:
         console.print(
-            "\n[yellow]Tip:[/yellow] Run [bold]aitool install <tool>[/bold] to reinstall a broken plugin."
+            "\n[yellow]Tip:[/yellow] Run [bold]aitool install <tool>[/bold]"
+            " to reinstall a broken plugin."
         )
         raise typer.Exit(1)

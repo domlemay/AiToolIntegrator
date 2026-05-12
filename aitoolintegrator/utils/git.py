@@ -8,8 +8,7 @@ from pathlib import Path
 import git
 from git import GitCommandError, InvalidGitRepositoryError, Repo
 
-from aitoolintegrator.utils.logger import get_logger, print_error
-
+from aitoolintegrator.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

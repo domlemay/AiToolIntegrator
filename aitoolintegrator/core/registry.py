@@ -11,7 +11,6 @@ from pydantic import ValidationError
 from aitoolintegrator.core.config import RegistryEntry
 from aitoolintegrator.utils.logger import get_logger
 
-
 logger = get_logger(__name__)
 
 _DEFAULT_REGISTRY_PATH = Path(__file__).parent.parent / "registry" / "tools.json"
@@ -83,13 +82,15 @@ def search_registry(
 
     for entry in entries:
         # Text match
-        searchable = " ".join([
-            entry.name,
-            entry.description_short,
-            entry.description_long,
-            " ".join(entry.tags),
-            entry.category,
-        ]).lower()
+        searchable = " ".join(
+            [
+                entry.name,
+                entry.description_short,
+                entry.description_long,
+                " ".join(entry.tags),
+                entry.category,
+            ]
+        ).lower()
 
         if q and q not in searchable:
             continue

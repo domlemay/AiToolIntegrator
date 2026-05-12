@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator
+from typing import Any
 
 import httpx
 
 from aitoolintegrator.utils.logger import get_logger
-
 
 logger = get_logger(__name__)
 
@@ -42,7 +42,7 @@ async def get_client(
         yield client
 
 
-async def get_json(url: str, params: dict[str, Any] | None = None) -> Any:
+async def get_json(url: str, params: dict[str, Any] | None = None) -> Any:  # noqa: ANN401
     """Perform a GET request and return parsed JSON.
 
     Args:

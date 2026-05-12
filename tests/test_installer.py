@@ -15,7 +15,6 @@ from aitoolintegrator.core.installer import (
     uninstall_plugin,
 )
 
-
 SAMPLE_ENTRY_DATA = {
     "name": "test-tool",
     "version": "1.0.0",
@@ -50,6 +49,7 @@ def plugins_dir(tmp_path: Path) -> Path:
 class TestGeneratePluginYaml:
     def test_creates_yaml_file(self, tmp_path: Path) -> None:
         import yaml
+
         from aitoolintegrator.core.config import RegistryEntry
 
         entry = RegistryEntry.model_validate(SAMPLE_ENTRY_DATA)
@@ -63,6 +63,7 @@ class TestGeneratePluginYaml:
 
     def test_yaml_has_required_keys(self, tmp_path: Path) -> None:
         import yaml
+
         from aitoolintegrator.core.config import RegistryEntry
 
         entry = RegistryEntry.model_validate(SAMPLE_ENTRY_DATA)
@@ -78,9 +79,7 @@ class TestRunInstallScript:
         assert result is True
 
     def test_runs_install_function(self, tmp_path: Path) -> None:
-        (tmp_path / "install.py").write_text(
-            "def install(plugin_dir, config):\n    return True\n"
-        )
+        (tmp_path / "install.py").write_text("def install(plugin_dir, config):\n    return True\n")
         result = _run_install_script(tmp_path, {})
         assert result is True
 
