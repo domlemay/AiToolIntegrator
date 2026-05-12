@@ -8,6 +8,7 @@ from aitoolintegrator.cli.commands.doctor import doctor_cmd
 from aitoolintegrator.cli.commands.info import info_cmd
 from aitoolintegrator.cli.commands.install import install_cmd
 from aitoolintegrator.cli.commands.list_tools import list_cmd
+from aitoolintegrator.cli.commands.refresh import refresh_cmd
 from aitoolintegrator.cli.commands.run import run_cmd
 from aitoolintegrator.cli.commands.search import search_cmd
 from aitoolintegrator.cli.commands.uninstall import uninstall_cmd
@@ -30,4 +31,5 @@ app.command("uninstall")(uninstall_cmd)
 app.command("list")(list_cmd)
 app.command("run")(run_cmd)
 app.command("info")(info_cmd)
+app.command("refresh")(refresh_cmd)
 app.command("doctor")(doctor_cmd)

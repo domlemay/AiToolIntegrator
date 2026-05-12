@@ -200,6 +200,33 @@ class TestUninstallCommand:
         assert result.exit_code == 0
 
 
+class TestRefreshCommand:
+    @patch("aitoolintegrator.cli.commands.refresh.Engine")
+    def test_refresh_shows_table(self, mock_engine: MagicMock, tmp_path: Path) -> None:
+        engine = _make_engine(tmp_path / "plugins")
+        engine.refresh.return_value = {"aider": (40000, 44000), "ollama": (120000, 130000)}
+        mock_engine.return_value = engine
+        result = runner.invoke(app, ["refresh"])
+        assert result.exit_code == 0
+        assert "aider" in result.output
+
+    @patch("aitoolintegrator.cli.commands.refresh.Engine")
+    def test_refresh_empty_report(self, mock_engine: MagicMock, tmp_path: Path) -> None:
+        engine = _make_engine(tmp_path / "plugins")
+        engine.refresh.return_value = {}
+        mock_engine.return_value = engine
+        result = runner.invoke(app, ["refresh"])
+        assert result.exit_code == 0
+
+    @patch("aitoolintegrator.cli.commands.refresh.Engine")
+    def test_refresh_file_not_found(self, mock_engine: MagicMock, tmp_path: Path) -> None:
+        engine = _make_engine(tmp_path / "plugins")
+        engine.refresh.side_effect = FileNotFoundError("registry missing")
+        mock_engine.return_value = engine
+        result = runner.invoke(app, ["refresh"])
+        assert result.exit_code != 0
+
+
 class TestDoctorCommand:
     @patch("aitoolintegrator.cli.commands.doctor.Engine")
     def test_doctor_all_healthy(self, mock_engine: MagicMock, tmp_path: Path) -> None:

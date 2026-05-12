@@ -14,7 +14,7 @@ logger = get_logger(__name__)
 
 DEFAULT_TIMEOUT = 30.0
 DEFAULT_HEADERS = {
-    "User-Agent": "AiToolIntegrator/0.1.0 (https://github.com/aitoolintegrator/aitoolintegrator)",
+    "User-Agent": "AiToolIntegrator/0.1.0 (https://github.com/domlemay/AiToolIntegrator)",
     "Accept": "application/json",
 }
 
@@ -65,23 +65,34 @@ async def get_json(url: str, params: dict[str, Any] | None = None) -> Any:  # no
             raise RuntimeError(f"Non-JSON response from {url}: {exc}") from exc
 
 
-async def fetch_github_stars(repo: str) -> int:
-    """Fetch the GitHub star count for a repository.
+async def fetch_github_stars(repo: str, token: str | None = None) -> int | None:
+    """Fetch the current star count for a GitHub repository.
 
     Args:
         repo: Repository in 'owner/name' format or full GitHub URL.
+        token: Optional GitHub personal access token (raises rate limit from
+            60 to 5 000 requests/hour).
 
     Returns:
-        Star count, or 0 if the request fails.
+        Star count, or None if the request fails (e.g. private repo, network error).
     """
-    # Normalize to owner/name
     if repo.startswith("https://github.com/"):
         repo = repo.removeprefix("https://github.com/").rstrip("/")
 
     url = f"https://api.github.com/repos/{repo}"
+    headers: dict[str, str] = {"X-GitHub-Api-Version": "2022-11-28"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
     try:
-        data = await get_json(url)
-        return int(data.get("stargazers_count", 0))
+        async with get_client(headers=headers) as client:
+            response = await client.get(url)
+            if response.status_code == 404:
+                logger.debug("Repository not found: %s", repo)
+                return None
+            response.raise_for_status()
+            data = response.json()
+            return int(data["stargazers_count"])
     except Exception as exc:
         logger.debug("Could not fetch stars for %s: %s", repo, exc)
-        return 0
+        return None

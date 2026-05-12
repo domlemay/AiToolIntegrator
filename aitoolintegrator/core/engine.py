@@ -12,7 +12,13 @@ from platformdirs import user_data_dir
 from aitoolintegrator.core.config import AppConfig, RegistryEntry
 from aitoolintegrator.core.executor import run_plugin
 from aitoolintegrator.core.installer import install_plugin, uninstall_plugin, update_plugin
-from aitoolintegrator.core.registry import get_entry, is_installed, load_registry, search_registry
+from aitoolintegrator.core.registry import (
+    get_entry,
+    is_installed,
+    load_registry,
+    refresh_stars,
+    search_registry,
+)
 from aitoolintegrator.utils.logger import get_logger
 from aitoolintegrator.utils.venv import venv_exists
 
@@ -202,6 +208,20 @@ class Engine:
             True if run() returned success.
         """
         return run_plugin(tool_name, self.plugins_dir, extra_args=extra_args)
+
+    # ── Refresh ────────────────────────────────────────────────────────────
+
+    def refresh(self, token: str | None = None) -> dict[str, tuple[int, int]]:
+        """Fetch current GitHub star counts and update the registry file.
+
+        Args:
+            token: Optional GitHub personal access token (raises rate limit
+                from 60 to 5 000 requests/hour).
+
+        Returns:
+            Dict mapping tool slug to (old_stars, new_stars).
+        """
+        return refresh_stars(self.registry_path, token=token)
 
     # ── Doctor ─────────────────────────────────────────────────────────────
 
