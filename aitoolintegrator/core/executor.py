@@ -14,7 +14,6 @@ from rich.panel import Panel
 from aitoolintegrator.core.config import PluginManifest
 from aitoolintegrator.utils.logger import get_logger, get_output_console, print_error, print_warning
 
-
 logger = get_logger(__name__)
 console = get_output_console()
 
@@ -97,7 +96,7 @@ def _merge_config(
     return merged
 
 
-def _load_run_module(plugin_dir: Path, module_name: str) -> Any:
+def _load_run_module(plugin_dir: Path, module_name: str) -> Any:  # noqa: ANN401
     """Dynamically import a plugin's run module.
 
     Args:

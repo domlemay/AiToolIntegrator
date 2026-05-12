@@ -96,8 +96,6 @@ select = [
     "RUF", # ruff-specific
 ]
 ignore = [
-    "ANN101",  # missing type annotation for self
-    "ANN102",  # missing type annotation for cls
     "ANN204",  # missing return type for __init__
 ]
 

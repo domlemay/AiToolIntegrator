@@ -6,7 +6,6 @@ from typing import Any
 
 from pydantic import BaseModel, field_validator, model_validator
 
-
 VALID_CATEGORIES = {
     "llm-runtime",
     "coding-assistant",
@@ -111,7 +110,7 @@ class IsolationModel(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def docker_requires_image(self) -> "IsolationModel":
+    def docker_requires_image(self) -> IsolationModel:
         """Validate that docker isolation specifies an image."""
         if self.type == "docker" and not self.docker_image:
             raise ValueError("isolation.docker_image required when type is 'docker'")
@@ -139,6 +138,7 @@ class PluginManifest(BaseModel):
     def name_is_slug(cls, v: str) -> str:
         """Validate that name is a valid slug (lowercase, hyphens/underscores only)."""
         import re
+
         if not re.match(r"^[a-z0-9][a-z0-9_-]*$", v):
             raise ValueError(f"name must be a slug (lowercase, hyphens/underscores), got: {v!r}")
         return v
@@ -183,6 +183,7 @@ class RegistryEntry(BaseModel):
     def name_is_slug(cls, v: str) -> str:
         """Validate name is a valid slug."""
         import re
+
         if not re.match(r"^[a-z0-9][a-z0-9_-]*$", v):
             raise ValueError(f"name must be a slug, got: {v!r}")
         return v
@@ -229,7 +230,7 @@ class PluginConfig(BaseModel):
     config_data: dict[str, Any] = {}
     cli_args: list[str] = []
 
-    def merged(self, overrides: dict[str, Any]) -> "PluginConfig":
+    def merged(self, overrides: dict[str, Any]) -> PluginConfig:
         """Return a new PluginConfig with overrides applied."""
         merged_data = {**self.config_data, **overrides}
         return PluginConfig(

@@ -8,7 +8,6 @@ from pathlib import Path
 
 from aitoolintegrator.utils.logger import get_logger
 
-
 logger = get_logger(__name__)
 
 
@@ -30,9 +29,7 @@ def create_venv(venv_dir: Path) -> None:
         )
         logger.debug("Created venv at %s", venv_dir)
     except subprocess.CalledProcessError as exc:
-        raise RuntimeError(
-            f"Failed to create venv at {venv_dir}: {exc.stderr}"
-        ) from exc
+        raise RuntimeError(f"Failed to create venv at {venv_dir}: {exc.stderr}") from exc
 
 
 def get_pip(venv_dir: Path) -> Path:
@@ -94,9 +91,7 @@ def install_requirements(venv_dir: Path, requirements_file: Path) -> None:
         )
         logger.debug("Installed requirements from %s", requirements_file)
     except subprocess.CalledProcessError as exc:
-        raise RuntimeError(
-            f"pip install failed: {exc.stderr}"
-        ) from exc
+        raise RuntimeError(f"pip install failed: {exc.stderr}") from exc
 
 
 def venv_exists(venv_dir: Path) -> bool:

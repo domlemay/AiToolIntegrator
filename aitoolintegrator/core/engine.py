@@ -16,7 +16,6 @@ from aitoolintegrator.core.registry import get_entry, is_installed, load_registr
 from aitoolintegrator.utils.logger import get_logger
 from aitoolintegrator.utils.venv import venv_exists
 
-
 logger = get_logger(__name__)
 
 _APP_NAME = "aitoolintegrator"
@@ -157,6 +156,7 @@ class Engine:
         """
         if is_installed(tool_name, self.plugins_dir):
             from aitoolintegrator.utils.logger import print_warning
+
             print_warning(f"'{tool_name}' is already installed.")
             return True
 
@@ -233,6 +233,7 @@ class Engine:
                 try:
                     raw = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
                     from aitoolintegrator.core.config import PluginManifest
+
                     PluginManifest.model_validate(raw)
                 except (yaml.YAMLError, ValidationError) as exc:
                     issues.append(f"Invalid plugin.yaml: {exc}")

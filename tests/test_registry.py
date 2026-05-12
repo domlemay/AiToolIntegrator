@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -15,7 +14,6 @@ from aitoolintegrator.core.registry import (
     load_registry,
     search_registry,
 )
-
 
 SAMPLE_TOOL = {
     "name": "test-tool",
@@ -138,18 +136,21 @@ class TestRegistryEntryValidation:
 
     def test_invalid_category_raises(self) -> None:
         from pydantic import ValidationError
+
         bad = {**SAMPLE_TOOL, "category": "not-a-real-category"}
         with pytest.raises(ValidationError):
             RegistryEntry.model_validate(bad)
 
     def test_invalid_name_slug_raises(self) -> None:
         from pydantic import ValidationError
+
         bad = {**SAMPLE_TOOL, "name": "Has Spaces!"}
         with pytest.raises(ValidationError):
             RegistryEntry.model_validate(bad)
 
     def test_negative_stars_raises(self) -> None:
         from pydantic import ValidationError
+
         bad = {**SAMPLE_TOOL, "stars": -1}
         with pytest.raises(ValidationError):
             RegistryEntry.model_validate(bad)

@@ -11,7 +11,6 @@ from aitoolintegrator.core.config import AppConfig
 from aitoolintegrator.core.engine import Engine
 from aitoolintegrator.utils.logger import get_output_console, print_info, print_warning
 
-
 console = get_output_console()
 
 
@@ -38,8 +37,7 @@ def search_cmd(
 
     if not results:
         print_warning(
-            f"No results for query {query!r}."
-            + (f" (tags: {tags})" if tags else ""),
+            f"No results for query {query!r}." + (f" (tags: {tags})" if tags else ""),
         )
         print_info("Try broader search terms or run 'aitool list' to see all tools.")
         raise typer.Exit(0)

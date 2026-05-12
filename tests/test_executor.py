@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
 import yaml
@@ -14,7 +13,6 @@ from aitoolintegrator.core.executor import (
     _merge_config,
     run_plugin,
 )
-
 
 VALID_MANIFEST = {
     "name": "test-tool",
@@ -44,15 +42,14 @@ def plugin_dir(tmp_path: Path) -> Path:
 
 @pytest.fixture()
 def plugin_with_manifest(plugin_dir: Path) -> Path:
-    (plugin_dir / "plugin.yaml").write_text(
-        yaml.dump(VALID_MANIFEST), encoding="utf-8"
-    )
+    (plugin_dir / "plugin.yaml").write_text(yaml.dump(VALID_MANIFEST), encoding="utf-8")
     return plugin_dir
 
 
 class TestLoadManifest:
     def test_loads_valid_manifest(self, plugin_with_manifest: Path) -> None:
         from aitoolintegrator.core.config import PluginManifest
+
         manifest = _load_manifest(plugin_with_manifest)
         assert manifest is not None
         assert isinstance(manifest, PluginManifest)
@@ -90,24 +87,28 @@ class TestLoadConfigYaml:
 class TestMergeConfig:
     def test_manifest_defaults_present(self, plugin_with_manifest: Path) -> None:
         from aitoolintegrator.core.config import PluginManifest
+
         manifest = PluginManifest.model_validate(VALID_MANIFEST)
         result = _merge_config(manifest, {}, [])
         assert result["name"] == "test-tool"
 
     def test_config_yaml_overrides_defaults(self, plugin_with_manifest: Path) -> None:
         from aitoolintegrator.core.config import PluginManifest
+
         manifest = PluginManifest.model_validate(VALID_MANIFEST)
         result = _merge_config(manifest, {"model": "mistral"}, [])
         assert result["model"] == "mistral"
 
     def test_cli_args_override_config_yaml(self, plugin_with_manifest: Path) -> None:
         from aitoolintegrator.core.config import PluginManifest
+
         manifest = PluginManifest.model_validate(VALID_MANIFEST)
         result = _merge_config(manifest, {"model": "mistral"}, ["model=llama3"])
         assert result["model"] == "llama3"
 
     def test_flag_args_set_to_true(self) -> None:
         from aitoolintegrator.core.config import PluginManifest
+
         manifest = PluginManifest.model_validate(VALID_MANIFEST)
         result = _merge_config(manifest, {}, ["--verbose"])
         assert result.get("verbose") is True
@@ -125,7 +126,8 @@ class TestRunPlugin:
         # Create a minimal run.py
         run_py = plugin_with_manifest / "run.py"
         run_py.write_text(
-            'def run(config, args=None):\n    return {"status": "success", "output": "ok", "metadata": {}}\n'
+            "def run(config, args=None):\n"
+            '    return {"status": "success", "output": "ok", "metadata": {}}\n'
         )
         result = run_plugin("test-tool", plugins_dir)
         assert result is True
@@ -133,9 +135,7 @@ class TestRunPlugin:
     def test_fails_on_run_error(self, plugin_with_manifest: Path) -> None:
         plugins_dir = plugin_with_manifest.parent
         run_py = plugin_with_manifest / "run.py"
-        run_py.write_text(
-            'def run(config, args=None):\n    raise ValueError("boom")\n'
-        )
+        run_py.write_text('def run(config, args=None):\n    raise ValueError("boom")\n')
         result = run_plugin("test-tool", plugins_dir)
         assert result is False
 
@@ -148,7 +148,8 @@ class TestRunPlugin:
         plugins_dir = plugin_with_manifest.parent
         run_py = plugin_with_manifest / "run.py"
         run_py.write_text(
-            'def run(config, args=None):\n    return {"status": "error", "output": "fail", "metadata": {}}\n'
+            "def run(config, args=None):\n"
+            '    return {"status": "error", "output": "fail", "metadata": {}}\n'
         )
         result = run_plugin("test-tool", plugins_dir)
         assert result is False
