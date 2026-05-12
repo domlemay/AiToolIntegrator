@@ -13,6 +13,7 @@ from aitoolintegrator.core.installer import (
     _run_install_script,
     install_plugin,
     uninstall_plugin,
+    update_plugin,
 )
 
 SAMPLE_ENTRY_DATA = {
@@ -147,4 +148,55 @@ class TestUninstallPlugin:
 
     def test_fails_when_not_installed(self, plugins_dir: Path) -> None:
         result = uninstall_plugin("no-such-tool", plugins_dir)
+        assert result is False
+
+
+class TestUpdatePlugin:
+    def test_fails_when_not_installed(self, plugins_dir: Path) -> None:
+        result = update_plugin("no-such-tool", plugins_dir)
+        assert result is False
+
+    def test_fails_when_src_missing(self, plugins_dir: Path) -> None:
+        tool_dir = plugins_dir / "test-tool"
+        tool_dir.mkdir()
+        # No src/ directory — should fail gracefully
+        result = update_plugin("test-tool", plugins_dir)
+        assert result is False
+
+    @patch("aitoolintegrator.core.installer.install_requirements")
+    @patch("aitoolintegrator.core.installer._run_install_script")
+    def test_successful_update(
+        self,
+        mock_install_script: MagicMock,
+        mock_req: MagicMock,
+        plugins_dir: Path,
+    ) -> None:
+        tool_dir = plugins_dir / "test-tool"
+        src_dir = tool_dir / "src"
+        src_dir.mkdir(parents=True)
+        (tool_dir / ".venv").mkdir()
+
+        mock_repo = MagicMock()
+        mock_req.return_value = None
+        mock_install_script.return_value = True
+
+        with patch("aitoolintegrator.core.installer.Repo", return_value=mock_repo):
+            result = update_plugin("test-tool", plugins_dir)
+
+        assert result is True
+        mock_repo.git.reset.assert_called_once_with("--hard", "FETCH_HEAD")
+
+    def test_fails_on_git_error(self, plugins_dir: Path) -> None:
+        from git import GitCommandError
+
+        tool_dir = plugins_dir / "test-tool"
+        src_dir = tool_dir / "src"
+        src_dir.mkdir(parents=True)
+
+        mock_repo = MagicMock()
+        mock_repo.remotes.origin.fetch.side_effect = GitCommandError("fetch", 1)
+
+        with patch("aitoolintegrator.core.installer.Repo", return_value=mock_repo):
+            result = update_plugin("test-tool", plugins_dir)
+
         assert result is False

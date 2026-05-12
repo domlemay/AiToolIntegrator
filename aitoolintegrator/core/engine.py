@@ -11,7 +11,7 @@ from platformdirs import user_data_dir
 
 from aitoolintegrator.core.config import AppConfig, RegistryEntry
 from aitoolintegrator.core.executor import run_plugin
-from aitoolintegrator.core.installer import install_plugin, uninstall_plugin
+from aitoolintegrator.core.installer import install_plugin, uninstall_plugin, update_plugin
 from aitoolintegrator.core.registry import get_entry, is_installed, load_registry, search_registry
 from aitoolintegrator.utils.logger import get_logger
 from aitoolintegrator.utils.venv import venv_exists
@@ -177,6 +177,17 @@ class Engine:
             True on success.
         """
         return uninstall_plugin(tool_name, self.plugins_dir)
+
+    def update(self, tool_name: str) -> bool:
+        """Update an installed plugin to its latest source version.
+
+        Args:
+            tool_name: Registry slug.
+
+        Returns:
+            True on success.
+        """
+        return update_plugin(tool_name, self.plugins_dir)
 
     # ── Execution ──────────────────────────────────────────────────────────
 

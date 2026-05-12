@@ -142,6 +142,35 @@ class TestInstallCommand:
         assert result.exit_code != 0
 
 
+class TestUpdateCommand:
+    @patch("aitoolintegrator.cli.commands.update.Engine")
+    def test_update_known_tool(self, mock_engine: MagicMock, tmp_path: Path) -> None:
+        mock_engine.return_value = _make_engine(tmp_path / "plugins")
+        result = runner.invoke(app, ["update", "test-tool"])
+        assert result.exit_code == 0
+
+    @patch("aitoolintegrator.cli.commands.update.Engine")
+    def test_update_failure_exits_1(self, mock_engine: MagicMock, tmp_path: Path) -> None:
+        engine = _make_engine(tmp_path / "plugins")
+        engine.update.return_value = False
+        mock_engine.return_value = engine
+        result = runner.invoke(app, ["update", "test-tool"])
+        assert result.exit_code != 0
+
+    @patch("aitoolintegrator.cli.commands.update.Engine")
+    def test_update_all_flag(self, mock_engine: MagicMock, tmp_path: Path) -> None:
+        plugins = tmp_path / "plugins"
+        plugins.mkdir()
+        (plugins / "test-tool").mkdir()
+        mock_engine.return_value = _make_engine(plugins)
+        result = runner.invoke(app, ["update", "--all"])
+        assert result.exit_code == 0
+
+    def test_update_no_args_exits_1(self) -> None:
+        result = runner.invoke(app, ["update"])
+        assert result.exit_code != 0
+
+
 class TestUninstallCommand:
     @patch("aitoolintegrator.cli.commands.uninstall.Engine")
     def test_uninstall_installed_tool(self, mock_engine: MagicMock, tmp_path: Path) -> None:
