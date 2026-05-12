@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aitoolintegrator.dev/schema/registry-entry.json",
+  "title": "RegistryEntry",
+  "description": "A single tool entry in the AiToolIntegrator registry",
+  "type": "object",
+  "required": ["name", "version", "description_short", "description_long", "repo", "category", "tags"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$",
+      "description": "Unique slug identifier"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semver version string"
+    },
+    "description_short": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "One-line description"
+    },
+    "description_long": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Detailed multi-line description"
+    },
+    "repo": {
+      "type": "string",
+      "format": "uri",
+      "description": "GitHub or source repository URL"
+    },
+    "homepage": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "Project homepage URL"
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX license identifier"
+    },
+    "stars": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "GitHub star count (approximate)"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "llm-runtime",
+        "coding-assistant",
+        "agent-framework",
+        "agent-orchestrator",
+        "prompt-engineering",
+        "image-generation",
+        "speech-to-text",
+        "rag-framework",
+        "dev-tool"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "language": {
+      "type": "string",
+      "description": "Primary implementation language"
+    },
+    "platforms": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["windows", "macos", "linux"]
+      }
+    },
+    "requires_gpu": {
+      "type": "boolean"
+    },
+    "min_ram_gb": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

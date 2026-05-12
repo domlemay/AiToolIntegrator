@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+*.tar.gz
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# Installed plugins (contain cloned repos and venvs — not committed)
+aitoolintegrator/plugins/*/
+!aitoolintegrator/plugins/.gitkeep
+
+# Test and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Type checking
+.mypy_cache/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Distribution
+MANIFEST
+PKG-INFO
+
+# Logs
+*.log
+
+# Secrets
+.env
+.env.local
+*.pem
+*.key
