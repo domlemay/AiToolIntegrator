@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import importlib.resources as pkg_resources
+import os
 from pathlib import Path
 from typing import Any
+
+from platformdirs import user_data_dir
 
 from aitoolintegrator.core.config import AppConfig, RegistryEntry
 from aitoolintegrator.core.executor import run_plugin
@@ -15,27 +19,58 @@ from aitoolintegrator.utils.venv import venv_exists
 
 logger = get_logger(__name__)
 
-_PROJECT_ROOT = Path(__file__).parent.parent
+_APP_NAME = "aitoolintegrator"
+_APP_AUTHOR = "aitoolintegrator"
+
+
+def _default_plugins_dir() -> Path:
+    """Return the user-scoped plugins directory (~/.local/share/aitoolintegrator/plugins/).
+
+    Can be overridden with the AITOOL_PLUGINS_DIR environment variable.
+
+    Returns:
+        Absolute path to the plugins directory.
+    """
+    env = os.environ.get("AITOOL_PLUGINS_DIR")
+    if env:
+        return Path(env)
+    return Path(user_data_dir(_APP_NAME, _APP_AUTHOR)) / "plugins"
+
+
+def _bundled_registry_path() -> Path:
+    """Return the path to the registry bundled inside the installed package.
+
+    Uses importlib.resources so this works whether the package is installed
+    from a wheel, an editable install, or run directly from source.
+
+    Can be overridden with the AITOOL_REGISTRY_PATH environment variable.
+
+    Returns:
+        Absolute path to tools.json.
+    """
+    env = os.environ.get("AITOOL_REGISTRY_PATH")
+    if env:
+        return Path(env)
+    ref = pkg_resources.files("aitoolintegrator") / "registry" / "tools.json"
+    return Path(str(ref))
 
 
 def _resolve_plugins_dir(config: AppConfig) -> Path:
-    """Resolve the absolute plugins directory path.
+    """Resolve and create the plugins directory from config.
 
     Args:
         config: Application configuration.
 
     Returns:
-        Absolute Path to the plugins directory.
+        Absolute Path to the plugins directory (created if absent).
     """
-    p = Path(config.plugins_dir)
-    if not p.is_absolute():
-        p = _PROJECT_ROOT / p
+    p = Path(config.plugins_dir) if config.plugins_dir else _default_plugins_dir()
     p.mkdir(parents=True, exist_ok=True)
     return p
 
 
 def _resolve_registry_path(config: AppConfig) -> Path:
-    """Resolve the absolute registry path.
+    """Resolve the registry path from config.
 
     Args:
         config: Application configuration.
@@ -43,10 +78,7 @@ def _resolve_registry_path(config: AppConfig) -> Path:
     Returns:
         Absolute Path to tools.json.
     """
-    p = Path(config.registry_path)
-    if not p.is_absolute():
-        p = _PROJECT_ROOT / p
-    return p
+    return Path(config.registry_path) if config.registry_path else _bundled_registry_path()
 
 
 class Engine:
@@ -56,7 +88,7 @@ class Engine:
         """Initialise the engine with application configuration.
 
         Args:
-            config: AppConfig instance. Uses defaults if not provided.
+            config: AppConfig instance. Uses smart defaults if not provided.
         """
         self.config = config or AppConfig()
         self.plugins_dir = _resolve_plugins_dir(self.config)
@@ -194,7 +226,6 @@ class Engine:
                 report[name] = issues
                 continue
 
-            # Check plugin.yaml
             manifest_path = plugin_dir / "plugin.yaml"
             if not manifest_path.exists():
                 issues.append("Missing plugin.yaml")
@@ -206,18 +237,13 @@ class Engine:
                 except (yaml.YAMLError, ValidationError) as exc:
                     issues.append(f"Invalid plugin.yaml: {exc}")
 
-            # Check venv
             venv_dir = plugin_dir / ".venv"
             if not venv_exists(venv_dir):
                 issues.append("Virtual environment missing or corrupt")
 
-            # Check run.py
             run_py = plugin_dir / "run.py"
-            if not run_py.exists():
-                # Also check src/run.py
-                src_run = plugin_dir / "src" / "run.py"
-                if not src_run.exists():
-                    issues.append("Missing run.py entrypoint")
+            if not run_py.exists() and not (plugin_dir / "src" / "run.py").exists():
+                issues.append("Missing run.py entrypoint")
 
             report[name] = issues
 

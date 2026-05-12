@@ -207,8 +207,8 @@ class RegistryEntry(BaseModel):
 class AppConfig(BaseModel):
     """Global application configuration."""
 
-    plugins_dir: str = "plugins"
-    registry_path: str = "registry/tools.json"
+    plugins_dir: str = ""
+    registry_path: str = ""
     log_level: str = "INFO"
     github_token: str | None = None
 
