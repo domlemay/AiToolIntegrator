@@ -12,6 +12,7 @@ from aitoolintegrator.core.registry import (
     get_entry,
     is_installed,
     load_registry,
+    refresh_stars,
     search_registry,
 )
 
@@ -154,3 +155,43 @@ class TestRegistryEntryValidation:
         bad = {**SAMPLE_TOOL, "stars": -1}
         with pytest.raises(ValidationError):
             RegistryEntry.model_validate(bad)
+
+
+class TestRefreshStars:
+    def test_updates_stars_in_file(self, registry_file: Path) -> None:
+        from unittest.mock import AsyncMock, patch
+
+        with patch(
+            "aitoolintegrator.core.registry.fetch_github_stars",
+            new=AsyncMock(return_value=9999),
+        ):
+            report = refresh_stars(registry_file)
+
+        assert "test-tool" in report
+        old, new = report["test-tool"]
+        assert old == 500
+        assert new == 9999
+
+        # Verify the file was updated on disk
+        data = json.loads(registry_file.read_text(encoding="utf-8"))
+        assert data[0]["stars"] == 9999
+
+    def test_skips_tool_when_api_returns_none(self, registry_file: Path) -> None:
+        from unittest.mock import AsyncMock, patch
+
+        with patch(
+            "aitoolintegrator.core.registry.fetch_github_stars",
+            new=AsyncMock(return_value=None),
+        ):
+            report = refresh_stars(registry_file)
+
+        # None means API failed — tool should be absent from report
+        assert "test-tool" not in report
+
+        # Stars in file should be unchanged
+        data = json.loads(registry_file.read_text(encoding="utf-8"))
+        assert data[0]["stars"] == 500
+
+    def test_raises_on_missing_file(self, tmp_path: Path) -> None:
+        with pytest.raises(FileNotFoundError):
+            refresh_stars(tmp_path / "nonexistent.json")

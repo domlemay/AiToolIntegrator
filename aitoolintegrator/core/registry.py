@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 from typing import Any
@@ -9,6 +10,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from aitoolintegrator.core.config import RegistryEntry
+from aitoolintegrator.utils.http import fetch_github_stars
 from aitoolintegrator.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -125,3 +127,52 @@ def is_installed(tool_name: str, plugins_dir: Path) -> bool:
     """
     plugin_path = plugins_dir / tool_name
     return plugin_path.exists() and plugin_path.is_dir()
+
+
+def refresh_stars(
+    path: Path,
+    token: str | None = None,
+) -> dict[str, tuple[int, int]]:
+    """Fetch current GitHub star counts and update tools.json in-place.
+
+    Sends one API request per tool concurrently (asyncio.gather), then
+    writes the updated JSON back to *path*.  Returns a mapping of
+    tool_name → (old_stars, new_stars) for every tool whose count was
+    fetched successfully.
+
+    Rate limits:
+        - 60 req/hr  without a token
+        - 5 000 req/hr with a GitHub personal access token
+
+    Args:
+        path: Absolute path to tools.json.
+        token: Optional GitHub personal access token.
+
+    Returns:
+        Dict mapping tool slug to (old_stars, new_stars).
+
+    Raises:
+        FileNotFoundError: If *path* does not exist.
+        OSError: If *path* is not writable (e.g. inside site-packages).
+    """
+    if not path.exists():
+        raise FileNotFoundError(f"Registry not found: {path}")
+
+    raw: list[dict[str, Any]] = json.loads(path.read_text(encoding="utf-8"))
+
+    async def _fetch_all() -> list[int | None]:
+        return list(
+            await asyncio.gather(*[fetch_github_stars(entry["repo"], token) for entry in raw])
+        )
+
+    star_counts = asyncio.run(_fetch_all())
+
+    report: dict[str, tuple[int, int]] = {}
+    for entry, new_count in zip(raw, star_counts, strict=True):
+        if new_count is not None:
+            old = int(entry.get("stars", 0))
+            entry["stars"] = new_count
+            report[entry["name"]] = (old, new_count)
+
+    path.write_text(json.dumps(raw, indent=2, ensure_ascii=False), encoding="utf-8")
+    return report

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from git import InvalidGitRepositoryError, Repo
 from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
 
 from aitoolintegrator.core.config import RegistryEntry
@@ -195,6 +196,84 @@ def install_plugin(
         progress.update(task, description="Done!", completed=7)
 
     print_success(f"'{tool_name}' installed successfully to {plugin_dir}")
+    return True
+
+
+def update_plugin(tool_name: str, plugins_dir: Path) -> bool:
+    """Update an installed plugin by pulling the latest source and reinstalling deps.
+
+    Flow:
+        1. Verify plugin is installed and src/ is a git repo
+        2. Fetch latest commits (shallow) and reset to origin/<branch>
+        3. Reinstall requirements.txt if present
+        4. Re-run install.py hook if present
+
+    Args:
+        tool_name: Registry slug for the tool to update.
+        plugins_dir: Base directory where plugins are installed.
+
+    Returns:
+        True on success, False on failure.
+    """
+    plugin_dir = plugins_dir / tool_name
+    src_dir = plugin_dir / "src"
+    venv_dir = plugin_dir / ".venv"
+
+    if not plugin_dir.exists():
+        print_error(
+            f"'{tool_name}' is not installed.",
+            suggestion="Run 'aitool install <tool>' first.",
+        )
+        return False
+
+    if not src_dir.exists():
+        print_error(
+            f"Source directory missing for '{tool_name}'.",
+            suggestion=f"Try: aitool uninstall {tool_name} && aitool install {tool_name}",
+        )
+        return False
+
+    with _make_progress() as progress:
+        task = progress.add_task(f"Updating '{tool_name}'…", total=4)
+
+        # Step 1: git fetch + reset
+        progress.update(task, description="Pulling latest source…")
+        try:
+            repo = Repo(str(src_dir))
+            origin = repo.remotes.origin
+            origin.fetch(depth=1)
+            repo.git.reset("--hard", "FETCH_HEAD")
+            logger.debug("Pulled latest commits for %s", tool_name)
+        except InvalidGitRepositoryError:
+            print_error(
+                f"'{src_dir}' is not a git repository.",
+                suggestion=f"Try: aitool uninstall {tool_name} && aitool install {tool_name}",
+            )
+            return False
+        except Exception as exc:
+            print_error(f"Git pull failed: {exc}")
+            return False
+        progress.advance(task)
+
+        # Step 2: Reinstall requirements
+        req_file = src_dir / "requirements.txt"
+        if req_file.exists() and venv_dir.exists():
+            progress.update(task, description="Reinstalling dependencies…")
+            try:
+                install_requirements(venv_dir, req_file)
+            except (RuntimeError, FileNotFoundError) as exc:
+                print_error(f"Dependency reinstall failed: {exc}")
+                return False
+        progress.advance(task)
+
+        # Step 3: Re-run install.py hook
+        progress.update(task, description="Running install hook…")
+        _run_install_script(src_dir, {})
+        progress.advance(task)
+
+        progress.update(task, description="Done!", completed=4)
+
+    print_success(f"'{tool_name}' updated successfully.")
     return True
 
 
